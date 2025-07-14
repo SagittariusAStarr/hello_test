@@ -17,6 +17,10 @@ using namespace chrono;
 
 char board[columnNumber][rowNumber];
 
+void mainMenu(int height, int width){
+    
+}
+
 void settingBoard(){                    // function which sets charaters within board
     for(int i = 0; i < rowNumber; i++){
         for(int j = 0; j < columnNumber; j++){
@@ -64,7 +68,7 @@ void settingBoard(){                    // function which sets charaters within 
 }
 
 void rollAnimation(int num1, int num2, int num3, int height, int width){
-    string colOffset = "", rowOffset = "";
+    string colOffset = "", rowOffset = "";              //this two strings for easier 'board' offset, witch depends on window size
     for(int i = 0; i < height; i++){
         rowOffset = rowOffset + "\n";
     }
@@ -72,7 +76,7 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
         colOffset = colOffset + " ";
     }
 
-    for(int i = 0; i < 3*rowNumber; i++){
+    for(int i = 0; i < 3*rowNumber; i++){   //first three spins
         system("clear");
         cout<<rowOffset;
         cout<<colOffset<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][0]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][1]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][2]<<"|"<<endl;
@@ -83,7 +87,7 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
         this_thread::sleep_for(milliseconds(100));
     }
 
-    for(int i = 0; i < 2*rowNumber; i++){
+    for(int i = 0; i < 2*rowNumber; i++){    //next two spins
         system("clear");
         cout<<rowOffset;
         cout<<colOffset<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][0]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][1]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][2]<<"|"<<endl;
@@ -94,12 +98,10 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
         this_thread::sleep_for(milliseconds(150));
     }
 
-    for(int i = 0; i < rowNumber; i++){
-
+    for(int i = 0; i < rowNumber; i++){     //spin until first number is the same as drawn first number
         if(i == num1){
             break;
         }
-
         system("clear");
         cout<<rowOffset;
         cout<<colOffset<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][0]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][1]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][2]<<"|"<<endl;
@@ -110,12 +112,10 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
         this_thread::sleep_for(milliseconds(150));
     }
 
-    for(int i = 0; i < rowNumber; i++){
-
+    for(int i = 0; i < rowNumber; i++){     //spin until second number is the same as drawn second number
         if(i == num2){
             break;
         }
-
         system("clear");
         cout<<rowOffset;
         cout<<colOffset<<"|"<<board[(num1 == 0 ? rowNumber-1 : num1 - 1)][0]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][1]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][2]<<"|"<<endl;
@@ -126,8 +126,7 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
         this_thread::sleep_for(milliseconds(150));
     }
 
-    for(int i = 0; i < rowNumber; i++){
-
+    for(int i = 0; i < rowNumber; i++){        //spin one additional time
         system("clear");
         cout<<rowOffset;
         cout<<colOffset<<"|"<<board[(num1 == 0 ? rowNumber-1 : num1 - 1)][0]<<"|"<<board[(num2 == 0 ? rowNumber-1 : num2 - 1)][1]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][2]<<"|"<<endl;
@@ -138,12 +137,10 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
         this_thread::sleep_for(milliseconds(150));
     }
 
-    for(int i = 0; i < rowNumber; i++){
-
+    for(int i = 0; i < rowNumber; i++){     //spin until third number is the same as drawn third number
         if(i == num3){
             break;
         }
-
         system("clear");
         cout<<rowOffset;
         cout<<colOffset<<"|"<<board[(num1 == 0 ? rowNumber-1 : num1 - 1)][0]<<"|"<<board[(num2 == 0 ? rowNumber-1 : num2 - 1)][1]<<"|"<<board[(i%rowNumber == 0 ? rowNumber - 1 : i%rowNumber - 1)][2]<<"|"<<endl;
@@ -155,18 +152,20 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
     }
 
     return;
-
 }
 
 int main(){
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    //check window size
+    struct winsize w;                       
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);       
+
+    //draw numbers
+    srand(time(NULL));      
+    int r1 = rand()%rowNumber, r2 = rand()%rowNumber, r3 = rand()%rowNumber;       
     
 
-    srand(time(NULL));
-    int r1 = rand()%rowNumber, r2 = rand()%rowNumber, r3 = rand()%rowNumber;
-    settingBoard();
-    rollAnimation(r1, r2, r3, w.ws_row/2 - 2, w.ws_col/2 - 3);
+    settingBoard();     //fill board
+    rollAnimation(r1, r2, r3, w.ws_row/2 - 2, w.ws_col/2 - 3);      //execute roll animation
 
     return 0;
 }

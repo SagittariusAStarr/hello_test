@@ -1,0 +1,10 @@
+    GGGGGGGGGGGG          AAAAAAAA        MMMM                   MMMM    EEEEEEEEEEEEEE
+    GGGGGGGGGGGG          AAAAAAAA        MMMMMM               MMMMMM    EEEEEEEEEEEEEE
+GGGG                  AAAA        AAAA    MMMMMMMM           MMMMMMMM    EEEE
+GGGG                  AAAA        AAAA    MMMM  MMMM       MMMM  MMMM    EEEE
+GGGG      GGGGGGGG    AAAA        AAAA    MMMM  MMMMMM   MMMMMM  MMMM    EEEEEEEEEEEE
+GGGG      GGGGGGGG    AAAAAAAAAAAAAAAA    MMMM      MMMMMMM      MMMM    EEEEEEEEEEEE
+GGGG          GGGG    AAAA        AAAA    MMMM                   MMMM    EEEE
+GGGG          GGGG    AAAA        AAAA    MMMM                   MMMM    EEEE
+    GGGGGGGGGG        AAAA        AAAA    MMMM                   MMMM    EEEEEEEEEEEEEE
+    GGGGGGGGGG        AAAA        AAAA    MMMM                   MMMM    EEEEEEEEEEEEEE
