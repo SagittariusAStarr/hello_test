@@ -7,6 +7,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <fstream>
+#include <ctype.h>
+#include <stdio.h>
+#include <termios.h>
+#include <algorithm>
 
 // definicions for easier code manipulation
 #define columnNumber 3 
@@ -17,8 +22,128 @@ using namespace chrono;
 
 char board[columnNumber][rowNumber];
 
-void mainMenu(int height, int width){
-    
+struct termios orig_termios;
+
+void disableRawMod(){ //Disabling Raw Mod
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); //setting default terminal attributes
+    system("setterm -cursor on"); //setting cursor on
+	return;
+}
+
+void enableRawMod(){ //Enabling Raw Mod
+	tcgetattr(STDIN_FILENO, &orig_termios); //getting default terminal attributes
+	atexit(disableRawMod); //making program execute function for disabling Raw Mod
+
+	struct termios raw = orig_termios; //copying default attr. into rew struct
+    raw.c_iflag &= ~(IXON | ICRNL);                  //modifing raw structs terminal attributes 
+	raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN); //here's too
+    raw.c_cc[VMIN] = 0;     //min input for read
+    raw.c_cc[VTIME] = 1;    //time for read (100ms)
+
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw); //setting raw attr. into terminal
+    system("setterm -cursor off"); //cursor off, why not
+	
+	return;
+}
+
+int mainMenu(int height, int width){           //display manu with options to choose (obviously)
+    string colOffset = "", rowOffset1 = "", rowOffset2 = "", rowOffset3 = "", color[2] = {"\033[7m","\033[0m"};
+    system("clear");
+
+    if(width < 100 || height < 30){         //check if window is enough to display logo, if not display smaller one
+        if(height < 16 || width < 30){          //if window is even more small, display error message
+            cout<<"\033[1;31m Window too small, please extend it \033[0m";
+            exit(1);
+        }
+
+        for(int i = 0; i < 6; i++){         //set vertical offset
+            colOffset += "\n";
+        }
+        for(int i = 0; i < (width/2 - 2); i++){         //set first horizontal offset
+            rowOffset1 += " ";
+        }
+        for(int i = 0; i < (width/2 - 5); i++){         //set second horizontal offset
+            rowOffset2 += " ";
+        }
+
+        while(true){            //display cutoff menu
+            cout<<colOffset<<rowOffset1<<"GAME"<<endl<<endl<<endl<<endl;
+            cout<<rowOffset2<<"-=-=-=-=-=-"<<endl<<endl;
+            cout<<rowOffset1<<"PLAY"<<endl<<endl;
+            cout<<rowOffset1<<"EXIT"<<endl<<endl;
+            cout<<rowOffset2<<"-=-=-=-=-=-";
+            exit(0);
+
+        }
+    }
+    else{               //if window size is enough
+        
+        for(int i = 0; i < 6; i++){         //set vertical offset
+            colOffset += "\n";
+        }
+        for(int i = 0; i < (width/2 - 44); i++){        //set first horizontal offset
+            rowOffset1 += " ";
+        }
+        for(int i = 0; i < (width/2 - 5); i++){         //set second horizontal offset
+            rowOffset2 += " ";
+        }
+        for(int i = 0; i < (width/2 - 2); i++){         //set third horizontal offset
+            rowOffset3 += " ";
+        }
+        
+        
+        fstream logo;       
+        string gameLogo;
+        logo.open("AddFiles/logo.txt", ios::in);    //open file with logo
+        if(!(logo.good())){         //if file does not exist, set error message as a logo insted 
+            gameLogo = rowOffset1;
+            gameLogo += "\033[1;31m Logo file does not found \033[0m";
+        }
+        else{           //if logo file exist, write logo in string 
+            string wayAround;
+            while(getline(logo, wayAround)){
+                gameLogo += rowOffset1;
+                gameLogo += wayAround;
+                gameLogo += "\n";
+            }
+            logo.close();           //close file
+        }
+
+        while(true){        //display full size menu
+            char holder;
+            int count = 0;
+                system("clear");
+                cout<<colOffset<<gameLogo<<endl<<endl<<endl<<endl;
+                cout<<rowOffset2<<"-=-=-=-=-=-"<<endl<<endl;
+                cout<<rowOffset3<<color[0]<<"PLAY\033[0m"<<endl<<endl;
+                cout<<rowOffset3<<color[1]<<"EXIT\033[0m"<<endl<<endl;
+                cout<<rowOffset2<<"-=-=-=-=-=-"<<endl;
+                while(read(STDIN_FILENO, &holder, 1) == 1){
+                    if((holder == 27 && count == 0) || (holder == 91 && count == 1) || ((holder == 65 || holder == 66) && count == 2)){
+                        count++;
+                        if(count == 3){
+                            swap(color[0], color[1]);
+                            break;
+                        }
+                    }
+                    else if(holder == 13){
+                        if(color[0] == "\033[7m"){
+                            return 0;
+                        }
+                        else if(color[1] == "\033[7m"){
+                            return 1;
+                        }
+                        else{
+                            cout<<"Error apeared in mainMenu function, aborded"<<endl;
+                            exit(1);
+                        }
+                    }
+                    else{
+                        count == 0;
+                    }
+                }
+            }
+    }
 }
 
 void settingBoard(){                    // function which sets charaters within board
@@ -151,21 +276,49 @@ void rollAnimation(int num1, int num2, int num3, int height, int width){
         this_thread::sleep_for(milliseconds(200));
     }
 
+    char holder;
+    while(read(STDIN_FILENO, &holder, 1) == 1 && holder != 0){}   //cleaning users input after animation in case they spamed on a keyboard
+    cout<<endl<<colOffset<<"Press anything to continue..."<<endl;
+    while(true){
+        if(read(STDIN_FILENO, &holder, 1) == 1){        //waiting for user input to gave 'em some time to see thier roll
+            break;
+        }
+    }    
+
     return;
 }
 
 int main(){
+    enableRawMod();
     //check window size
     struct winsize w;                       
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);       
 
     //draw numbers
     srand(time(NULL));      
-    int r1 = rand()%rowNumber, r2 = rand()%rowNumber, r3 = rand()%rowNumber;       
     
+    int r1 = rand()%rowNumber, r2 = rand()%rowNumber, r3 = rand()%rowNumber, menuOutput;       
 
-    settingBoard();     //fill board
-    rollAnimation(r1, r2, r3, w.ws_row/2 - 2, w.ws_col/2 - 3);      //execute roll animation
+    while(true){
 
+        menuOutput = mainMenu(w.ws_row, w.ws_col);
+
+        switch(menuOutput){  //what you choose on menu, is processing here
+            case 0:
+                r1 = rand()%rowNumber; 
+                r2 = rand()%rowNumber; 
+                r3 = rand()%rowNumber;       
+                settingBoard();     //fill board
+                rollAnimation(r1, r2, r3, w.ws_row/2 - 2, w.ws_col/2 - 3);      //execute roll animation
+                break;
+            case 1:
+                exit(0);
+                break;
+            default:
+                cout<<"Error apeared in main function in switch section, aborded"<<endl;
+                exit(1);
+                break;
+        }
+    }
     return 0;
 }
